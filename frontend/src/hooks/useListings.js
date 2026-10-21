@@ -8,11 +8,13 @@ export function useListings() {
 
   useEffect(() => {
     let active = true
-    listingsService.getAll()
-      .then((data) => active && setListings(data))
+    const load = () => listingsService.getAll()
+      .then((data) => { if (active) { setListings(data); setError('') } })
       .catch(() => active && setError('We couldn’t load your listings. Please try again.'))
       .finally(() => active && setLoading(false))
-    return () => { active = false }
+    load()
+    const unsubscribe = listingsService.subscribe(load)
+    return () => { active = false; unsubscribe() }
   }, [])
 
   return { listings, loading, error }
