@@ -1,0 +1,56 @@
+import { BadgeCheck, BookOpen, CheckCircle2, ChevronDown, ClipboardCheck, ExternalLink, HelpCircle, PackageCheck, PenLine, Search, ScanSearch, ShieldAlert, X } from 'lucide-react'
+import { useMemo, useState } from 'react'
+import { Link } from 'react-router-dom'
+import GuideCard from '../components/GuideCard'
+import { GUIDE_CATEGORIES, GUIDE_FAQS, LISTING_STATUS_GUIDE, SELLER_GUIDES } from '../data/sellerGuides'
+
+const statusIcons = { PenLine, ScanSearch, ClipboardCheck, BadgeCheck, PackageCheck }
+
+export default function SellerGuidesPage() {
+  const [query, setQuery] = useState('')
+  const [category, setCategory] = useState('All guides')
+  const [selected, setSelected] = useState(null)
+  const filtered = useMemo(() => {
+    const term = query.trim().toLowerCase()
+    return SELLER_GUIDES.filter((guide) => {
+      const categoryMatch = category === 'All guides' || guide.category === category
+      const searchText = `${guide.title} ${guide.summary} ${guide.category} ${guide.steps.map((step) => `${step.title} ${step.body}`).join(' ')}`.toLowerCase()
+      return categoryMatch && (!term || searchText.includes(term))
+    })
+  }, [category, query])
+
+  const openGuide = (guide) => {
+    setSelected(guide)
+    window.requestAnimationFrame(() => document.getElementById('guide-detail')?.scrollIntoView({ behavior: 'smooth', block: 'start' }))
+  }
+
+  return <div className="mx-auto max-w-7xl">
+    <section className="relative overflow-hidden rounded-[26px] bg-gradient-to-br from-[#153d27] via-[#1d5134] to-[#102f1e] px-5 py-8 text-white shadow-[0_20px_50px_rgba(16,43,29,.2)] sm:px-8 sm:py-10 lg:px-10">
+      <div aria-hidden="true" className="soft-float absolute -right-20 -top-24 size-72 rounded-full border-[42px] border-white/[.05]" />
+      <div aria-hidden="true" className="absolute bottom-6 right-[32%] size-2 rounded-full bg-[#ef8d55] shadow-[0_0_0_8px_rgba(239,141,85,.13)]" />
+      <div className="relative max-w-3xl"><span className="inline-flex items-center gap-2 rounded-full bg-white/10 px-3 py-1.5 text-[10px] font-bold uppercase tracking-[.12em] text-[#cde5d3] ring-1 ring-white/10"><BookOpen size={13} /> Seller help center</span><h2 className="mt-5 text-3xl font-semibold tracking-[-.045em] sm:text-[38px]">Build accurate listings with confidence</h2><p className="mt-3 max-w-2xl text-sm leading-6 text-[#c4d8ca]">Practical guidance for the documented TagCart workflow—from the first product image to seller-approved exports and listing history.</p></div>
+      <label className="relative mt-7 block max-w-2xl"><span className="sr-only">Search seller guides</span><Search className="absolute left-4 top-1/2 -translate-y-1/2 text-[#749581]" size={18} /><input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Search guides, steps, statuses or exports…" className="h-13 w-full rounded-2xl border border-white/15 bg-white px-12 pr-11 text-sm text-[#223129] shadow-[0_12px_30px_rgba(5,20,12,.18)] outline-none placeholder:text-[#9aa7a0] focus:ring-4 focus:ring-white/15" />{query && <button type="button" onClick={() => setQuery('')} className="absolute right-3 top-1/2 -translate-y-1/2 rounded-lg p-1.5 text-[#829087] hover:bg-[#edf2ee]" aria-label="Clear guide search"><X size={15} /></button>}</label>
+      <p className="relative mt-3 text-[10px] text-[#a9c5b1]">Based on the TagCart SRS/SDS seller workflow · Current prototype differences are clearly labeled</p>
+    </section>
+
+    <section className="mt-6" aria-labelledby="workflow-status-title"><div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between"><div><p className="text-[10px] font-bold uppercase tracking-[.13em] text-[#6c8874]">Workflow at a glance</p><h3 id="workflow-status-title" className="mt-1 text-lg font-semibold tracking-[-.025em] text-[#1d2d23]">Understand the five listing statuses</h3></div><Link to="/listings" className="inline-flex items-center gap-1.5 text-xs font-semibold text-[#34714a] hover:text-[#173f2a]">View your listings <ExternalLink size={13} /></Link></div>
+      <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-5">{LISTING_STATUS_GUIDE.map((status, index) => { const Icon = statusIcons[status.icon]; return <div key={status.name} className="ui-surface relative overflow-hidden rounded-2xl p-4"><span className="absolute right-3 top-2 text-[36px] font-bold tracking-[-.06em] text-[#edf3ee]">{index + 1}</span><span className="relative grid size-9 place-items-center rounded-xl bg-[#e4f1e8] text-[#34714a]"><Icon size={17} /></span><p className="relative mt-4 text-xs font-bold text-[#2b3b31]">{status.name}</p><p className="relative mt-1 text-[11px] leading-5 text-[#7c8780]">{status.description}</p></div> })}</div>
+    </section>
+
+    <section className="mt-8" aria-labelledby="all-guides-title"><div className="flex items-center justify-between gap-4"><div><p className="text-[10px] font-bold uppercase tracking-[.13em] text-[#6c8874]">Knowledge base</p><h3 id="all-guides-title" className="mt-1 text-lg font-semibold tracking-[-.025em] text-[#1d2d23]">Step-by-step seller guides</h3></div><span className="rounded-full bg-[#e7f1e9] px-3 py-1.5 text-[10px] font-bold text-[#467357]">{filtered.length} {filtered.length === 1 ? 'guide' : 'guides'}</span></div>
+      <div className="scrollbar-subtle mt-4 flex gap-2 overflow-x-auto pb-2" aria-label="Guide categories">{GUIDE_CATEGORIES.map((item) => <button key={item} type="button" onClick={() => setCategory(item)} className={`shrink-0 rounded-full px-3.5 py-2 text-[11px] font-semibold ${category === item ? 'bg-[#173f2a] text-white shadow-[0_7px_18px_rgba(23,63,42,.18)]' : 'border border-[#dce4dd] bg-white/80 text-[#66736b] hover:border-[#bfd1c4] hover:bg-white'}`}>{item}</button>)}</div>
+      {filtered.length ? <div className="mt-4 grid gap-4 sm:grid-cols-2 xl:grid-cols-3">{filtered.map((guide) => <GuideCard key={guide.id} guide={guide} onOpen={openGuide} />)}</div> : <div className="ui-surface mt-4 flex min-h-64 flex-col items-center justify-center rounded-2xl p-8 text-center"><span className="grid size-12 place-items-center rounded-2xl bg-[#e8f1ea] text-[#477457]"><Search size={20} /></span><h4 className="mt-4 text-sm font-semibold text-[#2e3931]">No matching guide</h4><p className="mt-1 max-w-sm text-xs leading-5 text-[#858e88]">Try a broader search or choose All guides.</p><button type="button" onClick={() => { setQuery(''); setCategory('All guides') }} className="mt-4 text-xs font-semibold text-[#34714a]">Clear filters</button></div>}
+    </section>
+
+    {selected && <GuideDetail guide={selected} onClose={() => setSelected(null)} />}
+
+    <section className="mt-10" aria-labelledby="faq-title"><div className="flex items-center gap-3"><span className="grid size-10 place-items-center rounded-xl bg-[#e5f1e8] text-[#34714a]"><HelpCircle size={19} /></span><div><p className="text-[10px] font-bold uppercase tracking-[.13em] text-[#6c8874]">Common questions</p><h3 id="faq-title" className="text-lg font-semibold tracking-[-.025em] text-[#1d2d23]">Seller FAQs</h3></div></div><div className="mt-4 space-y-2.5">{GUIDE_FAQS.map((faq) => <details key={faq.question} className="ui-surface group rounded-2xl px-4 py-1 sm:px-5"><summary className="flex cursor-pointer list-none items-center justify-between gap-4 py-4 text-sm font-semibold text-[#2d3b32]"><span>{faq.question}</span><ChevronDown size={17} className="shrink-0 text-[#829087] transition-transform group-open:rotate-180" /></summary><p className="border-t border-[#edf0ed] pb-4 pt-3 text-xs leading-6 text-[#6f7b73]">{faq.answer}</p></details>)}</div></section>
+
+    <section className="mt-8 flex flex-col gap-4 rounded-2xl border border-[#f0d9c8] bg-gradient-to-r from-[#fff8f1] to-[#fffdf9] p-5 sm:flex-row sm:items-center sm:justify-between"><div className="flex gap-3"><ShieldAlert className="mt-0.5 shrink-0 text-[#b66b37]" size={19} /><div><h3 className="text-sm font-semibold text-[#684329]">Seller verification is always required</h3><p className="mt-1 max-w-3xl text-xs leading-5 text-[#8b674d]">AI-assisted or simulated details can be wrong. Compare every attribute and claim with the actual product, packaging and reliable supplier information before approval or export.</p></div></div><Link to="/listings" className="btn-secondary inline-flex shrink-0 items-center justify-center gap-2 rounded-xl border border-[#e8cdb9] bg-white px-4 py-2.5 text-xs font-semibold text-[#865735]">Review listings <ExternalLink size={13} /></Link></section>
+  </div>
+}
+
+function GuideDetail({ guide, onClose }) {
+  return <section id="guide-detail" className="ui-surface scroll-mt-24 mt-8 overflow-hidden rounded-[24px]" aria-labelledby="guide-detail-title"><div className="flex items-start justify-between gap-4 border-b border-[#e8eee9] bg-gradient-to-r from-[#f5faf6] to-white px-5 py-5 sm:px-7"><div><div className="flex flex-wrap items-center gap-2"><span className="text-[10px] font-bold uppercase tracking-[.12em] text-[#62846c]">{guide.category}</span><span className="size-1 rounded-full bg-[#9caaa0]" /><span className="text-[10px] font-semibold text-[#7d8981]">{guide.availability}</span></div><h3 id="guide-detail-title" className="mt-2 text-xl font-semibold tracking-[-.03em] text-[#1c2d22]">{guide.title}</h3><p className="mt-1 text-xs leading-5 text-[#7b867f]">{guide.summary}</p></div><button type="button" onClick={onClose} className="rounded-xl border border-[#dfe6e0] bg-white p-2 text-[#738078] shadow-sm hover:bg-[#f2f6f3]" aria-label="Close guide details"><X size={17} /></button></div>
+    <div className="grid gap-0 lg:grid-cols-[minmax(0,1fr)_290px]"><div className="px-5 py-6 sm:px-7"><h4 className="text-xs font-bold uppercase tracking-[.11em] text-[#63736a]">Follow these steps</h4><ol className="mt-5 space-y-0">{guide.steps.map((step, index) => <li key={step.title} className="relative grid grid-cols-[32px_1fr] gap-3 pb-6 last:pb-0"><span className="relative z-10 grid size-8 place-items-center rounded-full bg-[#173f2a] text-[11px] font-bold text-white shadow-[0_6px_15px_rgba(23,63,42,.2)]">{index + 1}</span>{index < guide.steps.length - 1 && <span className="absolute left-[15px] top-8 h-[calc(100%-2rem)] w-px bg-[#dce6df]" />}<div className="pt-1"><h5 className="text-sm font-semibold text-[#2a3930]">{step.title}</h5><p className="mt-1 text-xs leading-6 text-[#727e76]">{step.body}</p></div></li>)}</ol></div><aside className="border-t border-[#e9eee9] bg-[#fafcfb] p-5 lg:border-l lg:border-t-0"><div className="rounded-2xl border border-[#efd8c5] bg-[#fff8f1] p-4"><div className="flex items-center gap-2 text-[#9a5c30]"><ShieldAlert size={16} /><h4 className="text-xs font-semibold">Important</h4></div><p className="mt-2 text-[11px] leading-5 text-[#86654d]">{guide.important}</p></div><div className="mt-5"><h4 className="text-xs font-semibold text-[#3c4b42]">Quick checks</h4><ul className="mt-3 space-y-2.5">{guide.tips.map((tip) => <li key={tip} className="flex gap-2 text-[11px] leading-5 text-[#707d75]"><CheckCircle2 className="mt-0.5 shrink-0 text-[#4f8a62]" size={14} />{tip}</li>)}</ul></div><Link to={guide.route} className="btn-primary mt-6 inline-flex w-full items-center justify-center gap-2 rounded-xl px-4 py-3 text-xs font-semibold">{guide.routeLabel}<ExternalLink size={13} /></Link></aside></div></section>
+}

@@ -11,6 +11,7 @@ import ListingsPage from './pages/ListingsPage'
 import NewListingPage from './pages/NewListingPage'
 import NotFoundPage from './pages/NotFoundPage'
 import SettingsPage from './pages/SettingsPage'
+import SellerGuidesPage from './pages/SellerGuidesPage'
 import VersionViewerPage from './pages/VersionViewerPage'
 
 export default function App() {
@@ -28,6 +29,7 @@ export default function App() {
         <Route path="/history" element={<HistoryPage />} />
         <Route path="/history/:id" element={<VersionViewerPage />} />
         <Route path="/settings" element={<SettingsPage />} />
+        <Route path="/seller-guides" element={<SellerGuidesPage />} />
         <Route path="*" element={<NotFoundPage />} />
       </Route>
     </Route>
